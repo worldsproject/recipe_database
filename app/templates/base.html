@@ -1,0 +1,40 @@
+<html lang="en">
+<head>
+	<title>Your Daily Meal Recipe Database</title>
+
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<div class='page'>
+    <div class='navbar navbar-default' role='navigation'>
+        <div class='container-fluid'>
+            <div class='navbar-header'>
+                <button type='button' class='navbar-toggle collapsed' data-toggle='collapse' data-target='#navbar-items'>
+                    <span class='sr-only'>Toggle Navigation</span>
+                    <span class='icon-bar'></span>
+                    <span class='icon-bar'></span>
+                    <span class='icon-bar'></span>
+                </button>
+                <a class='navbar-brand' href="{{ url_for('index') }}">Home</a>
+            </div>
+
+            <div class='collapse navbar-collapse' id='navbar-items'>
+            	<ul class='nav navbar-nav'>
+            		<li><a href="{{ url_for('how_to_use') }}">How to Use</a></li>
+            		<li><a href="{{ url_for('pricing') }}">Pricing</a></li>
+            	</ul>
+                <ul class='nav navbar-nav navbar-right'>
+                    {% if current_user.is_authenticated() %}
+                    <li>Hello {{ current_user.email }} <a href="{{ config.SECURITY_LOGOUT_URL }}">Logout</a></li>
+                    {% else %}
+                    <li><a href="{{ config.SECURITY_LOGIN_URL }}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+	<div class='container'>
+		{% block body %}{% endblock body %}
+	</div>
+</div>

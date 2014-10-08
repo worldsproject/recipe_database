@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block body %}
+<form class="form-signin" role="form" action="" method='post' name='login'>
+	{{ form.hidden_tag() }}
+	<h2 class="form-signin-heading">Please sign in</h2>
+	Username: {{ form.email(class_='form-control', autofocus=true, required=true, size=80) }} 
+	{% for error in form.errors.email %}
+        <span style="color: red;">[{{error}}]</span>
+    {% endfor %}
+	Password: {{ form.password(class_='form-control', required=true) }}
+
+	<label class="checkbox">
+		{{ form.remember_me }} Remember Me
+	</label>
+	<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+</form>
+
+{% endblock body %}
