@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block body %}
+<h3>How to Use</h3>
+There are 3 differnt types of requests you can make to get recipies back.
+
+<h4>Search by id</h4>
+<code>
+	https://db.yourdailymenu.org/api/v1/recipes/id?key=yourkey
+</code>
+
+<p>Any other recipe result also returns a recipe id, which can be used here to retreive an individual recipe.</p>
+
+<h4>Search by name</h4>
+
+<code>
+	https://db.yourdailymenu.org/api/v1/recipes
+	<br>
+	<p>POST Data</p>
+	<ul>
+		<li>name : what you are looking for</li>
+		<li>key : your api key</li>
+	</ul>
+</code>
+
+<h4> Search by ingredient </h4>
+
+<code>
+	https://db.yourdailymenu.org/api/v1/ingredients
+	<br>
+	<p>POST Data</p>
+	<ul>
+		<li>want : comma seperated list of ingredients your recipe <em>must</em> have.</li>
+		<li>dontwant : comma seperated list of ingredients your recipe <em>must <strong>not</strong></em> have.</li>
+		<li>key : your api key</li>
+	</ul>
+</code>
+{% endblock body %}
