@@ -22,10 +22,11 @@
             	<ul class='nav navbar-nav'>
             		<li><a href="{{ url_for('how_to_use') }}">How to Use</a></li>
             		<li><a href="{{ url_for('pricing') }}">Pricing</a></li>
+                    <li><a href="{{ url_for('user') }}">Account</a></li>
             	</ul>
                 <ul class='nav navbar-nav navbar-right'>
                     {% if current_user.is_authenticated() %}
-                    <li>Hello <a href="{{ url_for('user') }}"> {{ current_user.email }} </a><a href="{{ config.SECURITY_LOGOUT_URL }}">Logout</a></li>
+                    <li>Hello {{ current_user.email }}<a href="{{ config.SECURITY_LOGOUT_URL }}">Logout</a></li>
                     {% else %}
                     <li><a href="{{ config.SECURITY_LOGIN_URL }}">Login</a></li>
                     {% endif %}

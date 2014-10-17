@@ -1,7 +1,21 @@
 {% extends 'base.html' %}
 {% block body %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+
 <h3>Welcome {{ email }}</h3>
-<p>Your API key is: {{ key }}</p>
+<p>Your API key is: <code>{{ key }}</code></p>
 <p>You have {{ free }} credits remaining (reset at 00:00 UTC)</p>
-<p>You have {{ paid }} credits remaining <button class=btn>Buy More</button></p>
+<p>You have {% if paid == None %}0{% else %}{{ paid }}{% endif %} paid credits remaining</p>
+
+<div class='row'>
+	<div class='col-md-2'>
+		<button class='btn btn-success' id='fiveCheckout'>$5 of Credit</button>
+	</div>
+	<div class='col-md-2'>
+		<button class='btn btn-success' id='tenCheckout'>$10 of Credits</button>
+	</div>
+	<div class='col-md-2'>
+		<button class='btn btn-success' id='twentyCheckout'>$20 of Credits</button>
+	</div>
+</div>
 {% endblock body %}
