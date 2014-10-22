@@ -24,11 +24,12 @@ def how_to_use():
 @app.route('/test')
 def test():
 	r1 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == 'garlic')
-	r2 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == 'black beans')
+	r2 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name != 'onion')
 	r3 = r1.intersect(r2)
-	print(r3.count())
 
-	s = ''
+	s = str(r3.count()) + '<br>'
+	s = s + str(r1.count()) + '<br>'
+	s = s + str(r2.count()) + '<br>'
 
 	for x in r3:
 		s = s + x.name + '<br>'

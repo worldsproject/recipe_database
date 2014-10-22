@@ -46,11 +46,40 @@ def json_recipe(recipe):
 
 
 class IngredientAPI(Resource):
-	def get(self):
-		pass
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('with', type=str, help='Ingredients that you require in your recipe.', action='append')
+		self.reqparse.add_argument('without', type=str, help='Ingredients that cannot be in your recipe.', action='append')
+		self.reqparse.add_argument('key', type=str, help="Your API key is required.")
 
 	def post(self):
-		pass
+		args = self.reqparse.parse_args()
+
+		if user_able(args['key']):
+			t = None
+			for ing in args['with']:
+				q = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == ing)
+
+				if t is not None:
+					t = t.intersect(q)
+				else:
+					t = q
+
+			for ing in args['without']:
+				q = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name != ing)
+
+				if t is not None:
+					t = t.intersect(q)
+				else:
+					t = q				
+
+			rv = []
+
+			for r in t:
+				rv.append(json_recipe(r))
+
+			return rv
+
 
 class RecipeAPI(Resource):
 	def __init__(self):
