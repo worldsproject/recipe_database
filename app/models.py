@@ -1,6 +1,6 @@
 import hashlib, time, random
 
-from app import db
+from app import db, app
 from flask.ext.security import UserMixin, RoleMixin
 
 
@@ -58,6 +58,7 @@ class User(db.Model, UserMixin):
 
 class Recipe(db.Model):
     __tablename__ = 'recipe'
+    __searchable__ = ['name', 'description', 'directions']
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -93,3 +94,6 @@ class ModifiedIngredient(db.Model):
     ingredient = db.Column(db.Integer, db.ForeignKey('ingredient.id'))
     modifiers = db.relationship('Modifier', secondary=modifiers,
         backref=db.backref('modifiers', lazy='dynamic'), lazy='dynamic')
+
+import flask.ext.whooshalchemy as whooshalchemy
+whooshalchemy.whoosh_index(app, Recipe)

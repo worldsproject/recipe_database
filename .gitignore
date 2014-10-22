@@ -5,3 +5,4 @@ db_repository/
 __pycache__/
 add_all.py
 config.py
+search.db/

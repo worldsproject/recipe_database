@@ -120,7 +120,6 @@ def add_recipe():
 		step_number = step_number + 1
 
 	for ingredient in ingredients:
-		print(ingredient)
 		amount = ingredient['amount']
 		modifiers = ingredient['modifiers']
 		ing = ingredient['ingredient']

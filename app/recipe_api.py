@@ -23,9 +23,13 @@ def json_recipe(recipe):
 	rv['name'] = recipe.name
 	rv['directions'] = recipe.directions
 	i = []
+
 	for ing in recipe.ingredients:
+		if ing.ingredient is None:
+			continue
+
 		ings = {}
-		ings['name'] = db.session.query(models.Ingredient).filter(models.Ingredient.id == ing.ingredient).first().name
+		ings['name'] = db.session.query(models.Ingredient).filter(models.Ingredient.id == int(ing.ingredient)).first().name
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		m = []
@@ -72,12 +76,15 @@ class RecipeTitleAPI(Resource):
 		args = self.reqparse.parse_args()
 
 		if user_able(args['key']):
-			recipes = db.session.query(models.Recipe).filter(models.Recipe.name.like("%" + args['name'] + "%")).all()
+			recipes = models.Recipe.query.whoosh_search(args['name']).all()
+			print(recipes)
 
 			rv = []
 
 			for r in recipes:
 				rv.append(json_recipe(r))
+
+			return(rv)
 		else:
 			abort(403)
 
