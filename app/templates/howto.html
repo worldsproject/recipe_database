@@ -29,9 +29,19 @@ There are 3 differnt types of requests you can make to get recipies back.
 	<br>
 	<p>POST Data</p>
 	<ul>
-		<li>want : comma seperated list of ingredients your recipe <em>must</em> have.</li>
-		<li>dontwant : comma seperated list of ingredients your recipe <em>must <strong>not</strong></em> have.</li>
+		<li>with : Ingredients your recipe <em>must</em> have.</li>
+		<li>without : Ingredients your recipe <em>must <strong>not</strong></em> have.</li>
 		<li>key : your api key</li>
 	</ul>
+</code>
+Each <code>with</code> and <code>without</code> item should be submitted as seperate variables.
+Submit a POST request like so:<br>
+<code>
+https://db.yourdailymenu.org/api/v1/ingredients<br>
+POST Data<br>
+key:yourkey<br>
+with:onion<br>
+with:garlic<br>
+without:tomato<br>
 </code>
 {% endblock body %}
