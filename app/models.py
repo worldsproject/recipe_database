@@ -8,14 +8,9 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
-ingredients = db.Table('ingredients',
-    db.Column('modified_ingredient', db.Integer, db.ForeignKey('modified_ingredient.id')),
-    db.Column('ingredient', db.Integer, db.ForeignKey('ingredient.id'))
-    )
-
 modifiers = db.Table('modifiers',
+    db.Column('modifier', db.Integer, db.ForeignKey('modifier.id')),
     db.Column('modified_ingredient', db.Integer, db.ForeignKey('modified_ingredient.id')),
-    db.Column('modifier', db.Integer, db.ForeignKey('modifier.id'))
     )
 
 modified_ingredients = db.Table('modified_ingredients',
@@ -78,8 +73,8 @@ class Ingredient(db.Model):
     __tablename__ = 'ingredient'
 
     id = db.Column(db.Integer, primary_key=True)
-
     name = db.Column(db.String(30), index=True, unique=True)
+    mod_ing = db.relationship("ModifiedIngredient")
 
 class Modifier(db.Model):
     __tablename__ = 'modifier'
@@ -95,7 +90,6 @@ class ModifiedIngredient(db.Model):
 
     amount = db.Column(db.Integer)
     unit = db.Column(db.String(20))
-    ingredients = db.relationship('Ingredient', secondary=ingredients, 
-        backref=db.backref('ingredients', lazy='dynamic'), lazy='dynamic')
+    ingredient = db.Column(db.Integer, db.ForeignKey('ingredient.id'))
     modifiers = db.relationship('Modifier', secondary=modifiers,
         backref=db.backref('modifiers', lazy='dynamic'), lazy='dynamic')

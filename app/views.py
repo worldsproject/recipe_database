@@ -1,9 +1,11 @@
-from app import app, db, models, user_datastore
-
-from flask import request, render_template
+from app import app, db, models, user_datastore, recipe_api, api
+from sqlalchemy import or_
+from flask import request, render_template, url_for, redirect, flash, abort
 
 import json
 import requests
+
+import stripe
 
 from flask.ext.security import user_registered, login_required, current_user
 
@@ -19,6 +21,20 @@ def pricing():
 def how_to_use():
 	return render_template('howto.html')
 
+@app.route('/test')
+def test():
+	r1 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == 'garlic')
+	r2 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == 'black beans')
+	r3 = r1.intersect(r2)
+	print(r3.count())
+
+	s = ''
+
+	for x in r3:
+		s = s + x.name + '<br>'
+
+	return s
+
 @app.route('/user')
 @login_required
 def user():
@@ -30,12 +46,7 @@ def user():
 
 @user_registered.connect_via(app)
 def user_reg(sender, user, **extra):
-	print('User!')
 	user.generate_key()
-
-@app.route('/api/v1/recipes/<int:recipe_id>', methods=['GET'])
-def get_recipe():
-	return 'Recipe Got'
 
 def add_if_not_exist(item, which):
 	if which == 'ingredients':
@@ -54,7 +65,40 @@ def add_if_not_exist(item, which):
 		else:
 			return db.session.query(models.Modifier).filter_by(name=item).first()
 
+@app.route('/credit', methods=['POST'])
+def credit():
+	stripe.api_key = app.config['TEST_PRIVATE_TOKEN']
+	token = request.form['stripeToken']
+	amount = request.form['price']
+	email = request.form['stripeEmail']
 
+	if amount == '5':
+		amount = 500
+	elif amount == '10':
+		amount = 1000
+	elif amount == '20':
+		amount = 2000
+	else:
+		return abort(503)
+
+	customer = stripe.Customer.create(
+		email = email,
+		card = token)
+
+	charge = stripe.Charge.create(
+		customer = customer.id,
+		amount = amount,
+		currency = 'usd',
+		description = 'Buying ' + str(amount) + '0 API credits.')
+
+	if current_user.credits is None:
+		current_user.credits = (amount*10)
+	else:
+		current_user.credits = current_user.credits + (amount*10)
+	db.session.commit()
+
+	flash(str(amount) + " credits have been added.")
+	return redirect(url_for('user'))
 
 @app.route('/api/v1/recipes/add', methods=['POST'])
 def add_recipe():
@@ -76,6 +120,7 @@ def add_recipe():
 		step_number = step_number + 1
 
 	for ingredient in ingredients:
+		print(ingredient)
 		amount = ingredient['amount']
 		modifiers = ingredient['modifiers']
 		ing = ingredient['ingredient']
@@ -94,7 +139,7 @@ def add_recipe():
 		if(len(amount) == 1):
 			amount.append('')
 		
-		mi = models.ModifiedIngredient(amount=amount[0], unit=amount[1], ingredients=[i], modifiers=m)
+		mi = models.ModifiedIngredient(amount=amount[0], unit=amount[1], ingredient=i.id, modifiers=m)
 		db.session.add(mi)
 		mis.append(mi)
 

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block body %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
+
 
 <h3>Welcome {{ email }}</h3>
 <p>Your API key is: <code>{{ key }}</code></p>
@@ -8,14 +8,52 @@
 <p>You have {% if paid == None %}0{% else %}{{ paid }}{% endif %} paid credits remaining</p>
 
 <div class='row'>
-	<div class='col-md-2'>
-		<button class='btn btn-success' id='fiveCheckout'>$5 of Credit</button>
+	<div class='col-md-4'>
+		<form action='/credit' method='post'>
+      <h3>Add 5,000 API requests</h3>
+			<input type='hidden' name='price' value='5'>
+			<script
+        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+        data-key="{{ config.TEST_PUBLIC_TOKEN }}"
+        data-image="/square-image.png"
+        data-name="Your Daily Meal DB"
+        data-description="5000 API requests ($5.00)"
+        data-amount="500">
+      </script>
+		</form>
 	</div>
-	<div class='col-md-2'>
-		<button class='btn btn-success' id='tenCheckout'>$10 of Credits</button>
+	<div class='col-md-4'>
+		<form action='/credit' method='post'>
+      <h3>Add 10,000 API requests</h3>
+      <input type='hidden' name='price' value='10'>
+      <script
+        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+        data-key="{{ config.TEST_PUBLIC_TOKEN }}"
+        data-image="/square-image.png"
+        data-name="Your Daily Meal DB"
+        data-description="10000 API requests ($10.00)"
+        data-amount="1000">
+      </script>
+    </form>
 	</div>
-	<div class='col-md-2'>
-		<button class='btn btn-success' id='twentyCheckout'>$20 of Credits</button>
+	<div class='col-md-4'>
+		<form action='/credit' method='post'>
+      <h3>Add 20,000 API requests</h3>
+      <input type='hidden' name='price' value='20'>
+      <script
+        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+        data-key="{{ config.TEST_PUBLIC_TOKEN }}"
+        data-image="/square-image.png"
+        data-name="Your Daily Meal DB"
+        data-description="20000 API requests ($20.00)"
+        data-amount="2000">
+      </script>
+    </form>
 	</div>
 </div>
+
+
 {% endblock body %}
+{% block script %}
+<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+{% endblock script %}
