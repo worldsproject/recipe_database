@@ -6,3 +6,4 @@ __pycache__/
 add_all.py
 config.py
 search.db/
+create_admin.py
