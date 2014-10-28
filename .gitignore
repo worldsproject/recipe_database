@@ -7,3 +7,4 @@ add_all.py
 config.py
 search.db/
 create_admin.py
+*.pyc

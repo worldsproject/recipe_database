@@ -95,5 +95,8 @@ class ModifiedIngredient(db.Model):
     modifiers = db.relationship('Modifier', secondary=modifiers,
         backref=db.backref('modifiers', lazy='dynamic'), lazy='dynamic')
 
+    def __str__:
+        return str(id)
+
 import flask.ext.whooshalchemy as whooshalchemy
 whooshalchemy.whoosh_index(app, Recipe)
