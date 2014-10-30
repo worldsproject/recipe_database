@@ -33,6 +33,8 @@ def json_recipe(recipe):
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		ings['modifiers'] = ing.modifiers
+		
+		i.append(ings)
 
 	rv['ingredients'] = i
 
@@ -44,7 +46,7 @@ class IngredientAPI(Resource):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('with', type=str, help='Ingredients that you require in your recipe.', action='append')
 		self.reqparse.add_argument('without', type=str, help='Ingredients that cannot be in your recipe.', action='append')
-		self.reqparse.add_argument('key', type=str, help="Your API key is required.")
+		self.reqparse.add_argument('key', required=True, type=str, help="Your API key is required.")
 
 	def post(self):
 		args = self.reqparse.parse_args()
@@ -78,7 +80,7 @@ class IngredientAPI(Resource):
 class RecipeAPI(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('key', type=str, help='Your API Key is required.')
+		self.reqparse.add_argument('key', type=str, required=True, help='Your API Key is required.')
 
 	def get(self, id):
 		args = self.reqparse.parse_args()
@@ -92,8 +94,8 @@ class RecipeAPI(Resource):
 class RecipeTitleAPI(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('key', type=str, help='Your API Key is required.')
-		self.reqparse.add_argument('name', type=str, help='Your search terms are required.')
+		self.reqparse.add_argument('key', type=str, required=True, help='Your API Key is required.')
+		self.reqparse.add_argument('name', type=str, required=True, help='Your search terms are required.')
 
 	def post(self):
 		args = self.reqparse.parse_args()
