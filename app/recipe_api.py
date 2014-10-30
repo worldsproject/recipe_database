@@ -33,7 +33,7 @@ def json_recipe(recipe):
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		ings['modifiers'] = ing.modifiers
-		
+
 		i.append(ings)
 
 	rv['ingredients'] = i
@@ -113,6 +113,60 @@ class RecipeTitleAPI(Resource):
 		else:
 			abort(403)
 
+class RecipeAddAPI(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('name', type=str)
+		self.reqparse.add_argument('description' type=str)
+		self.reqparse.add_argument('directions', type=str)
+		self.reqparse.add_argument('prep_time' type=int)
+		self.reqparse.add_argument('cook_time', type=int)
+		self.reqparse.add_argument('image', type=str)
+		self.reqparse.add_argument('ingredient', type=str, action=append)
+		self.reqparse.add_argument('key', type=str, required=True)
+
+	def post(self):
+		args = self.reqparse.parse_args()
+
+		if args['key'] != app.config.API_KEY:
+			abort(403)
+
+		recipe = models.Recipe(
+			name = args['name'],
+			description = args['description'],
+			directions = args['directions'],
+			prep_time = args['prep_time'],
+			cook_time = args['cook_time'],
+			image = args['image'])
+
+		for i in args['ingredient']:
+			#ingredients are given in the form amount/\unit/\name/\modifiers with
+			#modifiers being optional
+
+			ing = i.split('/\\')
+			if len(ing) != 3 || len(ing) != 4:
+				abort(403)
+
+			ingredient = None
+			if len(ing) == 3:
+				ingredient = models.Ingredient(
+					amount = ing[0],
+					unit = ing[1],
+					name = ing[2])
+
+			if len(ing) == 4:
+				ingredient = models.Ingredient(
+					amount = ing[0],
+					unit = ing[1],
+					name = ing[2],
+					modifiers = ing[3])
+
+			recipe.ingredients.append(ingredient)
+
+		db.session.commit()
+		return "Recipe Added", 201
+
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')	
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
 api.add_resource(IngredientAPI, '/api/v1/ingredients')
+api.add_resource(RecipeAddAPI, '/api/v1/add')
