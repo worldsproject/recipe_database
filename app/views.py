@@ -21,21 +21,6 @@ def pricing():
 def how_to_use():
 	return render_template('howto.html')
 
-@app.route('/test')
-def test():
-	r1 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == 'garlic')
-	r2 = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name != 'onion')
-	r3 = r1.intersect(r2)
-
-	s = str(r3.count()) + '<br>'
-	s = s + str(r1.count()) + '<br>'
-	s = s + str(r2.count()) + '<br>'
-
-	for x in r3:
-		s = s + x.name + '<br>'
-
-	return s
-
 @app.route('/user')
 @login_required
 def user():
@@ -48,23 +33,6 @@ def user():
 @user_registered.connect_via(app)
 def user_reg(sender, user, **extra):
 	user.generate_key()
-
-def add_if_not_exist(item, which):
-	if which == 'ingredients':
-		if db.session.query(models.Ingredient).filter_by(name=item).count() < 1:
-			i = models.Ingredient(name=item)
-			db.session.add(i)
-			return i
-		else:
-			return db.session.query(models.Ingredient).filter_by(name=item).first()
-
-	if which == 'modifier':
-		if db.session.query(models.Modifier).filter_by(name=item).count() < 1:
-			m = models.Modifier(name=item)
-			db.session.add(m)
-			return m
-		else:
-			return db.session.query(models.Modifier).filter_by(name=item).first()
 
 @app.route('/credit', methods=['POST'])
 def credit():
@@ -100,50 +68,3 @@ def credit():
 
 	flash(str(amount) + " credits have been added.")
 	return redirect(url_for('user'))
-
-@app.route('/api/v1/recipes/add', methods=['POST'])
-def add_recipe():
-	r = json.loads(request.form['recipe'])
-
-	title = r['title']
-
-	directions = r['directions']
-
-	ingredients = r['ingredients']
-
-	step_number = 1;
-	steps = ''
-
-	mis = []
-
-	for direction in directions:
-		steps = steps + str(step_number) + ': ' + direction + "\n"
-		step_number = step_number + 1
-
-	for ingredient in ingredients:
-		amount = ingredient['amount']
-		modifiers = ingredient['modifiers']
-		ing = ingredient['ingredient']
-
-		i = add_if_not_exist(ing, 'ingredients')
-		m = []
-
-		for mod in modifiers:
-			m.append(add_if_not_exist(mod, 'modifier'))
-
-		amount = amount.split(' ')
-
-		if(len(amount) > 2):
-			m.append(add_if_not_exist(" ".join(amount[2:]), 'modifier'))
-
-		if(len(amount) == 1):
-			amount.append('')
-		
-		mi = models.ModifiedIngredient(amount=amount[0], unit=amount[1], ingredient=i.id, modifiers=m)
-		db.session.add(mi)
-		mis.append(mi)
-
-	recipe = models.Recipe(name=title, directions=steps, ingredients=mis)
-	db.session.add(recipe)
-	db.session.commit()
-	return 'Woah'

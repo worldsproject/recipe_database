@@ -8,14 +8,9 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
-modifiers = db.Table('modifiers',
-    db.Column('modifier', db.Integer, db.ForeignKey('modifier.id')),
-    db.Column('modified_ingredient', db.Integer, db.ForeignKey('modified_ingredient.id')),
-    )
-
-modified_ingredients = db.Table('modified_ingredients',
+ingredients = db.Table('ingredients',
     db.Column('recipe', db.Integer, db.ForeignKey('recipe.id')),
-    db.Column('modified_ingredient', db.Integer, db.ForeignKey('modified_ingredient.id'))
+    db.Column('ingredient', db.Integer, db.ForeignKey('ingredient.id'))
     )
 
 class Role(db.Model, RoleMixin):
@@ -67,36 +62,18 @@ class Recipe(db.Model):
     directions = db.Column(db.Text)
     prep_time = db.Column(db.Integer)
     cook_time = db.Column(db.Integer)
-    image = db.Column(db.LargeBinary())
-    ingredients = db.relationship('ModifiedIngredient', secondary=modified_ingredients)
+    image = db.Column(db.Text)
+    ingredients = db.relationship('Ingredient', secondary=ingredients)
 
 class Ingredient(db.Model):
     __tablename__ = 'ingredient'
+    __searchable__ = ['name', 'modifiers']
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), index=True, unique=True)
-    mod_ing = db.relationship("ModifiedIngredient")
-
-class Modifier(db.Model):
-    __tablename__ = 'modifier'
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    name = db.Column(db.String(30), index=True, unique=True)
-
-class ModifiedIngredient(db.Model):
-    __tablename__ = 'modified_ingredient'
-
-    id = db.Column(db.Integer, primary_key=True)
-
     amount = db.Column(db.Integer)
     unit = db.Column(db.String(20))
-    ingredient = db.Column(db.Integer, db.ForeignKey('ingredient.id'))
-    modifiers = db.relationship('Modifier', secondary=modifiers,
-        backref=db.backref('modifiers', lazy='dynamic'), lazy='dynamic')
-
-    def __str__(self):
-        return str(id)
+    modifiers = db.Column(db.Text)
 
 import flask.ext.whooshalchemy as whooshalchemy
 whooshalchemy.whoosh_index(app, Recipe)

@@ -10,17 +10,5 @@ class RecipeView(ModelView):
 class IngredientView(ModelView):
     def is_accessible(self):
         return current_user.has_role("admin")
-        
-    column_list = ('id', 'name')
 
-class ModifierView(ModelView):
-    def is_accessible(self):
-        return current_user.has_role("admin")
-        
-    column_list = ('id', 'name')
-
-class ModifiedIngredientView(ModelView):
-    def is_accessible(self):
-        return current_user.has_role("admin")
-
-    column_list = ('id', 'amount', 'unit', 'ingredient')
+    column_list = ('id', 'amount', 'unit', 'name')

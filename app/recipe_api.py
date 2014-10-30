@@ -3,6 +3,9 @@ from flask import jsonify
 from app import api, db, models
 
 def user_able(user_key):
+	if user_key == config.API_KEY:
+		return True
+	
 	user = db.session.query(models.User).filter(models.User.key == user_key).first()
 
 	if user.free_credits > 0:
@@ -25,20 +28,11 @@ def json_recipe(recipe):
 	i = []
 
 	for ing in recipe.ingredients:
-		if ing.ingredient is None:
-			continue
-
 		ings = {}
-		ings['name'] = db.session.query(models.Ingredient).filter(models.Ingredient.id == int(ing.ingredient)).first().name
+		ings['name'] = ing.name
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
-		m = []
-
-		for x in ing.modifiers:
-			m.append(x.name)
-
-		ings['modifiers'] = m
-		i.append(ings)
+		ings['modifiers'] = ing.modifiers
 
 	rv['ingredients'] = i
 
@@ -58,7 +52,7 @@ class IngredientAPI(Resource):
 		if user_able(args['key']):
 			t = None
 			for ing in args['with']:
-				q = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name == ing)
+				q = db.session.query(models.Recipe).join(models.Ingredient).filter(models.Ingredient.name == ing)
 
 				if t is not None:
 					t = t.intersect(q)
@@ -66,7 +60,7 @@ class IngredientAPI(Resource):
 					t = q
 
 			for ing in args['without']:
-				q = db.session.query(models.Recipe).join(models.ModifiedIngredient, models.Recipe.ingredients).join(models.Ingredient).filter(models.Ingredient.name != ing)
+				q = db.session.query(models.Recipe).join(models.Ingredient).filter(models.Ingredient.name != ing)
 
 				if t is not None:
 					t = t.intersect(q)
