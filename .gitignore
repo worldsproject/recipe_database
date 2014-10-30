@@ -8,3 +8,5 @@ config.py
 search.db/
 create_admin.py
 *.pyc
+test.db
+tmp/
