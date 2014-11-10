@@ -17,10 +17,10 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
-    
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
- 
+
     email = db.Column(db.String(120), index=True, unique=True)
     free_credits = db.Column(db.Integer, default=100)
     credits = db.Column(db.Integer)
@@ -64,13 +64,14 @@ class Recipe(db.Model):
     cook_time = db.Column(db.Integer)
     image = db.Column(db.Text)
     ingredients = db.relationship('Ingredient', secondary=ingredients)
+    credit = db.Column(db.String)
 
 class Ingredient(db.Model):
     __tablename__ = 'ingredient'
     __searchable__ = ['name', 'modifiers']
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), index=True, unique=True)
+    name = db.Column(db.String(30), index=True)
     amount = db.Column(db.Integer)
     unit = db.Column(db.String(20))
     modifiers = db.Column(db.Text)
