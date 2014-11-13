@@ -33,6 +33,8 @@ def json_recipe(recipe):
 
 	for ing in recipe.ingredients:
 		ings = {}
+
+		ings['original'] = ing.original
 		ings['name'] = ing.name
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
@@ -123,8 +125,8 @@ class RecipeAddAPI(Resource):
 		self.reqparse.add_argument('name', type=str, required=True)
 		self.reqparse.add_argument('description', type=str)
 		self.reqparse.add_argument('directions', type=str, action='append', required=True)
-		self.reqparse.add_argument('prep_time', type=int)
-		self.reqparse.add_argument('cook_time', type=int)
+		self.reqparse.add_argument('prep_time', type=str)
+		self.reqparse.add_argument('cook_time', type=str)
 		self.reqparse.add_argument('image', type=str)
 		self.reqparse.add_argument('ingredient', type=str, action='append', required=True)
 		self.reqparse.add_argument('key', type=str, required=True)
@@ -147,33 +149,35 @@ class RecipeAddAPI(Resource):
 		db.session.add(recipe)
 
 		dirs = ''
-		if args['description'] is not None:
-			for d in args['description']:
+		if args['directions'] is not None:
+			for d in args['directions']:
 				dirs = dirs + '|' + d
 
 		recipe.directions = dirs
 
 		for i in args['ingredient']:
-			#ingredients are given in the form amount/\unit/\name/\modifiers with
+			#ingredients are given in the form original/\amount/\unit/\name/\modifiers with
 			#modifiers being optional
 
 			ing = i.split('/\\')
-			if len(ing) != 3 and len(ing) != 4:
+			if len(ing) != 4 and len(ing) != 5:
 				return i, 403
 
 			ingredient = None
-			if len(ing) == 3:
-				ingredient = models.Ingredient(
-					amount = ing[0],
-					unit = ing[1],
-					name = ing[2])
-
 			if len(ing) == 4:
 				ingredient = models.Ingredient(
-					amount = ing[0],
-					unit = ing[1],
-					name = ing[2],
-					modifiers = ing[3])
+					original = ing[0],
+					amount = ing[1],
+					unit = ing[2],
+					name = ing[3])
+
+			if len(ing) == 5:
+				ingredient = models.Ingredient(
+					original = ing[0],
+					amount = ing[1],
+					unit = ing[2],
+					name = ing[3],
+					modifiers = ing[4])
 
 			db.session.add(ingredient)
 			recipe.ingredients.append(ingredient)

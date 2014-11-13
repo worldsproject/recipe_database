@@ -60,8 +60,8 @@ class Recipe(db.Model):
     name = db.Column(db.String(256))
     description = db.Column(db.Text)
     directions = db.Column(db.Text)
-    prep_time = db.Column(db.Integer)
-    cook_time = db.Column(db.Integer)
+    prep_time = db.Column(db.String(15))
+    cook_time = db.Column(db.String(15))
     image = db.Column(db.Text)
     ingredients = db.relationship('Ingredient', secondary=ingredients)
     credit = db.Column(db.String)
@@ -71,6 +71,7 @@ class Ingredient(db.Model):
     __searchable__ = ['name', 'modifiers']
 
     id = db.Column(db.Integer, primary_key=True)
+    original = db.Column(db.Text)
     name = db.Column(db.String(30), index=True)
     amount = db.Column(db.Integer)
     unit = db.Column(db.String(20))
