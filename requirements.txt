@@ -1,3 +1,4 @@
+CherryPy==3.6.0
 Flask==0.10.1
 Flask-Admin==1.0.8
 Flask-Login==0.2.11
@@ -12,7 +13,6 @@ Flask-WhooshAlchemy==0.56
 Jinja2==2.7.3
 MarkupSafe==0.23
 SQLAlchemy==0.9.8
-Twisted==14.0.2
 WTForms==2.0.1
 Werkzeug==0.9.6
 Whoosh==2.6.0
