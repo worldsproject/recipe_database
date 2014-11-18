@@ -11,4 +11,4 @@ class IngredientView(ModelView):
     def is_accessible(self):
         return current_user.has_role("admin")
 
-    column_list = ('id', 'amount', 'unit', 'name')
+    column_list = ('id', 'original', 'amount', 'unit', 'name')
