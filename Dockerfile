@@ -42,11 +42,14 @@ RUN pip install -r recipe_database/requirements.txt #updated for cherrypy
 # Expose 80 for webserver
 EXPOSE 80
 
-# Set the working directory to be recipe_database
-WORKDIR /recipe_database
-
 # Setup database
 RUN /recipe_database/reset_db.sh
+
+# Add admin user
+RUN python /recipe_database/create_admin.py
+
+# Set the working directory to be recipe_database
+WORKDIR /recipe_database
 
 # Start the server
 CMD python run.py
