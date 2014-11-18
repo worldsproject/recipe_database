@@ -68,7 +68,7 @@ class Recipe(db.Model):
 
 class Ingredient(db.Model):
     __tablename__ = 'ingredient'
-    __searchable__ = ['name', 'modifiers']
+    __searchable__ = ['name', 'modifiers', 'original']
 
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text)

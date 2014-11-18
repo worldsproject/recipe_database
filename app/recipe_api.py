@@ -107,7 +107,7 @@ class RecipeTitleAPI(Resource):
 		args = self.reqparse.parse_args()
 
 		if user_able(args['key']):
-			recipes = models.Recipe.query.whoosh_search(args['name']).all()
+			recipes = models.Recipe.query.whoosh_search(args['name'], 10).all()
 			print(recipes)
 
 			rv = []
