@@ -18,23 +18,26 @@ wget \
 dialog \
 net-tools \
 build-essential \
-libssl-dev
-
-# Basic python deps.
-RUN apt-get install -y python python-dev python-distribute
+libssl-dev \
+libpq-dev \
+python3 \ 
+python3-dev
 
 # Install correct version of pip
 RUN wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-RUN python get-pip.py
+RUN python3 get-pip.py
 
 # Clone the recipe database.
-RUN git clone https://github.com/worldsproject/recipe_database.git #Update dammit
+#RUN git clone https://github.com/worldsproject/recipe_database.git
+
+#Copy from local dir for faster testing.
+ADD ./ /recipe_database
 
 # Add in the config file
 COPY ./config.py /recipe_database/config.py
 
 # Create the tmp directory for logging.
-RUN mkdir recipe_database/tmp
+RUN mkdir recipe_database/tmp | echo
 
 # Install all the pip requirements
 RUN pip install -r recipe_database/requirements.txt #updated for cherrypy
@@ -43,13 +46,13 @@ RUN pip install -r recipe_database/requirements.txt #updated for cherrypy
 EXPOSE 80
 
 # Setup database
-RUN /recipe_database/reset_db.sh
+RUN /recipe_database/reset_db.sh #
 
 # Add admin user
-RUN python /recipe_database/create_admin.py
+#RUN python3 /recipe_database/create_admin.py #
 
 # Set the working directory to be recipe_database
 WORKDIR /recipe_database
 
 # Start the server
-CMD python run.py
+CMD python3 run.py #

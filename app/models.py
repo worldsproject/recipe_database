@@ -57,7 +57,7 @@ class Recipe(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(256))
+    name = db.Column(db.Text)
     description = db.Column(db.Text)
     directions = db.Column(db.Text)
     prep_time = db.Column(db.String(15))
@@ -72,10 +72,7 @@ class Ingredient(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text)
-    name = db.Column(db.String(30), index=True)
-    amount = db.Column(db.Integer)
+    name = db.Column(db.Text, index=True)
+    amount = db.Column(db.String(10))
     unit = db.Column(db.String(20))
     modifiers = db.Column(db.Text)
-
-import flask.ext.whooshalchemy as whooshalchemy
-whooshalchemy.whoosh_index(app, Recipe)
