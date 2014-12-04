@@ -3,12 +3,15 @@ db.create_all()
 
 from app import models, user_datastore
 
-user_datastore.create_role(name="admin", description="Site Administrators.")
-user_datastore.create_user(email="tbutram@worldsproject.org", password="atrus palin greyor")
+try:
+    user_datastore.create_role(name="admin", description="Site Administrators.")
+    user_datastore.create_user(email="tbutram@worldsproject.org", password="atrus palin greyor")
 
-user_datastore.add_role_to_user("tbutram@worldsproject.org", "admin")
+    user_datastore.add_role_to_user("tbutram@worldsproject.org", "admin")
 
-db.session.commit()
+    db.session.commit()
+except:
+    pass
 
 # Import your application as:
 # from app import application
