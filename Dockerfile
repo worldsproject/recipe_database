@@ -28,10 +28,10 @@ RUN wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 RUN python3 get-pip.py
 
 # Clone the recipe database.
-#RUN git clone https://github.com/worldsproject/recipe_database.git
+RUN git clone https://github.com/worldsproject/recipe_database.git
 
 #Copy from local dir for faster testing.
-ADD ./ /recipe_database
+#ADD ./ /recipe_database
 
 # Add in the config file
 COPY ./config.py /recipe_database/config.py
