@@ -10,3 +10,4 @@ create_admin.py
 *.pyc
 test.db
 tmp/
+run_all.sh
