@@ -4,8 +4,9 @@
 
 <h3>Welcome {{ email }}</h3>
 <p>Your API key is: <code>{{ key }}</code></p>
-<p>You have {{ free }} credits remaining (reset at 00:00 UTC)</p>
+<p>You have {{ free }} free credits remaining (reset at 00:00 UTC)</p>
 <p>You have {% if paid == None %}0{% else %}{{ paid }}{% endif %} paid credits remaining</p>
+<p>As the database is in beta, all credits are free. Please use credit card number 4242 4242 4242 4242, a future date and any CVC to apply credits to your account.</p>
 
 <div class='row'>
 	<div class='col-md-4'>
