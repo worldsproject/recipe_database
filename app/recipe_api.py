@@ -188,23 +188,48 @@ class RecipeAddAPI(Resource):
 		return "Recipe Added", 201
 
 class ResetFree(Resource):
-	if user_key == app.config['API_KEY']:
-		users = db.session.query(models.User)
+	def __init__(self):
+		self.reqparse.add_argument('key', type=str, required=True)
 
-		for user in users:
-			user.free_credits = 100
+	def get(self):
+		args = self.reqparse.parse_args()
 
-		db.session.commit()
+		if args['key'] == app.config['API_KEY']:
+			users = db.session.query(models.User)
 
-		return "Free Credits Reset", 201
-	else
-		return 403
+			for user in users:
+				user.free_credits = 100
+
+			db.session.commit()
+
+			return "Free Credits Reset", 201
+		else
+			return 403
 
 
-db.session.commit()
+class ReportError(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('id', type=str, required=True)
+		self.reqparse.add_argument('reason', type=str)
+
+	def post(self):
+		args = self.reqparse.parse_args()
+
+		body = "Recipe ID: " + args['id']
+
+		if args['reason'] != None:
+			body = body + "\nReason for being incorrect: " + args['reason']
+
+		app.logger.error(body)
+
+		return "Bad Recipe Reported", 200
+
+
 
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
 api.add_resource(IngredientAPI, '/api/v1/ingredients')
 api.add_resource(RecipeAddAPI, '/api/v1/add')
 api.add_resource(ResetFree, '/api/v1/reset')
+api.add_resource(ReportError, '/api/v1/report_error')
