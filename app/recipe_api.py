@@ -203,7 +203,7 @@ class ResetFree(Resource):
 			db.session.commit()
 
 			return "Free Credits Reset", 201
-		else
+		else:
 			return 403
 
 
