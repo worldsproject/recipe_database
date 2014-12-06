@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource, reqparse
 from flask import jsonify, abort
 from app import app, api, db, models
+from sqlalchemy import update
 
 def user_able(user_key):
 	if user_key == app.config['API_KEY']:
@@ -186,7 +187,24 @@ class RecipeAddAPI(Resource):
 		db.session.commit()
 		return "Recipe Added", 201
 
+class ResetFree(Resource):
+	if user_key == app.config['API_KEY']:
+		users = db.session.query(models.User)
+
+		for user in users:
+			user.free_credits = 100
+
+		db.session.commit()
+
+		return "Free Credits Reset", 201
+	else
+		return 403
+
+
+db.session.commit()
+
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
 api.add_resource(IngredientAPI, '/api/v1/ingredients')
 api.add_resource(RecipeAddAPI, '/api/v1/add')
+api.add_resource(ResetFree, '/api/v1/reset')
