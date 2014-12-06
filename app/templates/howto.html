@@ -5,7 +5,7 @@ There are 3 different types of requests you can make to get recipes back.
 
 <h4>Search by id</h4>
 <code>
-	https://db.yourdailymenu.org/api/v1/recipes/id?key=yourkey
+	https://db.yourdaily.menu/api/v1/recipes/id?key=yourkey
 </code>
 
 <p>Any other recipe result also returns a recipe id, which can be used here to retrieve an individual recipe.</p>
@@ -13,7 +13,7 @@ There are 3 different types of requests you can make to get recipes back.
 <h4>Full text search</h4>
 
 <code>
-	https://db.yourdailymenu.org/api/v1/recipes
+	https://db.yourdaily.menu/api/v1/recipes
 	<br>
 	<p>POST Data</p>
 	<ul>
@@ -25,7 +25,7 @@ There are 3 different types of requests you can make to get recipes back.
 <h4> Search by ingredient </h4>
 
 <code>
-	https://db.yourdailymenu.org/api/v1/ingredients
+	https://db.yourdaily.menu/api/v1/ingredients
 	<br>
 	<p>POST Data</p>
 	<ul>
@@ -43,5 +43,18 @@ key:yourkey<br>
 with:onion<br>
 with:garlic<br>
 without:tomato<br>
+</code>
+
+<h4>Reporting a bad recipe</h4>
+<p>If you find some bad recipe data, either badly formatted ingredients, broken directions or anything else, please send the recipe ID so that it can be fixed.</p>
+
+<code>
+	https://db.yourdaily.menu/api/v1/report_error
+	<br>
+	<p>POST Data</p>
+	<ul>
+		<li>id : The recipe ID that is bad.</li>
+		<li>reason : (Optional) Reasoning why the recipe is bad. While optional, reported recipes with a reason are given a higher priority.</li>
+	</ul>
 </code>
 {% endblock body %}
