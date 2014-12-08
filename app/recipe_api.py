@@ -21,7 +21,7 @@ def user_able(user_key):
 
 	return False
 
-def json_recipe(recipe):
+def json_recipe(recipe, admin=False):
 	rv = {}
 
 	rv['name'] = recipe.name
@@ -42,6 +42,8 @@ def json_recipe(recipe):
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		ings['modifiers'] = ing.modifiers
+		if admin:
+			ings['id'] = ing.id
 
 		i.append(ings)
 

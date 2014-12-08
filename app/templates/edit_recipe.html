@@ -1,0 +1,21 @@
+{% extends 'base/html' %}
+{% block body %}
+<h3>Name</h3><input type='text' name='recipe_name' value={{ recipe_name }}><br>
+<h3>Directions</h3><textarea name='directions'>{{ directions }}</textarea><br>
+<h3>Prep Time</h3><input type='text' name='prep_time' value={{ prep_time }}><br>
+<h3>Cook Time</h3><input type='text' name='cook_time' value={{ cook_time }}><br>
+<h3>Image URL</h3><input type='text' name='image' value={{ image }}><br>
+<h3>ID</h3><input type='text' name='recipe_id' value={{ recipe_id }}><br>
+<h3>Origin</h3><input type='text' name='credit' value={{ credit }}></br>
+
+{% for ing in ingredients %}
+	<hr>
+	<h3>Original</h3><textarea name='original'>{{ ing.original }}</textarea><br>
+	<h3>ID</h3><input type='text' name='id_{{ loop.index0 }}' value='{{ ing.id }}'><br>
+	<h3>Name</h3><input type='text' name='name_{{ loop.index0 }}' value='{{ ing.name }}'><br>
+	<h3>Unit</h3><input type='text' name='unit_{{ loop.index0 }}' value='{{ ing.unit }}'><br>
+	<h3>Amount</h3><input type='text' name='amount_{{ loop.index0 }}' value='{{ ing.amount }}'><br>
+	<h3>Modifiers</h3><input type='text' name='modifiers_{{ loop.index0 }}' value='{{ ing.modifiers }}'><br>
+{% endfor %}
+
+{% endblock body %}
