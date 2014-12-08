@@ -2,10 +2,11 @@ from app import db
 db.create_all()
 
 from app import models, user_datastore
+from config import ADMIN_PASSWORD
 
 try:
     user_datastore.create_role(name="admin", description="Site Administrators.")
-    user_datastore.create_user(email="tbutram@worldsproject.org", password="atrus palin greyor")
+    user_datastore.create_user(email="tbutram@worldsproject.org", password=ADMIN_PASSWORD)
 
     user_datastore.add_role_to_user("tbutram@worldsproject.org", "admin")
 
