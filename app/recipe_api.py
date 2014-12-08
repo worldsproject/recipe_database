@@ -31,6 +31,7 @@ def json_recipe(recipe):
 	rv['cook_time'] = recipe.cook_time
 	rv['image'] = recipe.image
 	rv['id'] = recipe.id
+	rv['origin'] = recipe.credit
 	i = []
 
 	for ing in recipe.ingredients:
