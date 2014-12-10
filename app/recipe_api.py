@@ -38,7 +38,7 @@ def json_recipe(recipe, admin=False):
 		ings = {}
 
 		ings['original'] = ing.original
-		ings['name'] = ing.name
+		ings['name'] = ing.name.name
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		ings['modifiers'] = ing.modifiers

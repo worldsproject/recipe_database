@@ -72,7 +72,14 @@ class Ingredient(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text)
-    name = db.Column(db.Text, index=True)
+    name = db.Column(db.Integer, db.ForeignKey('ingredient_name.id'))
     amount = db.Column(db.String(10))
     unit = db.Column(db.String(20))
     modifiers = db.Column(db.Text)
+
+class Ingredient_Name(db.Model):
+    __tablename__ = 'ingredient_name'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text)
+    ings = db.relationship('Ingredient', backref='ing', lazy='dynamic')

@@ -34,12 +34,12 @@ def user():
 def user_reg(sender, user, **extra):
 	user.generate_key()
 
-@app.route('/admin/recipe/<int:recipe_id>')
+@app.route('/recipe_edit/<int:recipe_id>')
 def edit_recipe(recipe_id):
 	recipe = db.session.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
-	from recipe_api import json_recipe
+	from app.recipe_api import json_recipe
 
-	return render_template('edit_recipe.html', json_recipe(recipe))
+	return render_template('edit_recipe.html', recipe=json_recipe(recipe, admin=True))
 
 @app.route('/credit', methods=['POST'])
 def credit():

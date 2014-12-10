@@ -25,8 +25,8 @@ from flask.ext.admin.contrib.sqla import ModelView
 from app.admin_views import RecipeView, IngredientView
 
 admin = Admin(app)
-admin.add_view(RecipeView(models.Recipe, db.session))
-admin.add_view(IngredientView(models.Ingredient, db.session))
+# admin.add_view(RecipeView(models.Recipe, db.session))
+# admin.add_view(IngredientView(models.Ingredient, db.session))
 
 from app import views
 
