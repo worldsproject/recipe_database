@@ -3,6 +3,13 @@ import hashlib, time, random
 from app import db, app
 from flask.ext.security import UserMixin, RoleMixin
 
+from flask.ext.sqlalchemy import BaseQuery
+from sqlalchemy_searchable import SearchQueryMixin
+from sqlalchemy_utils.types import TSVectorType
+from sqlalchemy_searchable import make_searchable
+
+make_searchable()
+
 
 roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
@@ -51,9 +58,12 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return self.id
 
+class RecipeQuery(BaseQuery, SearchQueryMixin):
+    pass
+
 class Recipe(db.Model):
+    query_class = RecipeQuery
     __tablename__ = 'recipe'
-    __searchable__ = ['name', 'description', 'directions']
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -62,13 +72,19 @@ class Recipe(db.Model):
     directions = db.Column(db.Text)
     prep_time = db.Column(db.String(15))
     cook_time = db.Column(db.String(15))
+    meal = db.Column(db.Integer)
     image = db.Column(db.Text)
     ingredients = db.relationship('Ingredient', secondary=ingredients)
     credit = db.Column(db.String)
 
+    search_vector = db.Column(TSVectorType('name', 'description', 'directions'))
+
+class IngredientQuery(BaseQuery, SearchQueryMixin):
+    pass
+    
 class Ingredient(db.Model):
+    query_class = IngredientQuery
     __tablename__ = 'ingredient'
-    __searchable__ = ['name', 'modifiers', 'original']
 
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text)
@@ -76,6 +92,8 @@ class Ingredient(db.Model):
     amount = db.Column(db.String(10))
     unit = db.Column(db.String(20))
     modifiers = db.Column(db.Text)
+
+    search_vector = db.Column(TSVectorType('original'))
 
 class Ingredient_Name(db.Model):
     __tablename__ = 'ingredient_name'

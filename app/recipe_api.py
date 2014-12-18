@@ -3,6 +3,12 @@ from flask import jsonify, abort
 from app import app, api, db, models
 from sqlalchemy import update
 
+from sqlalchemy_searchable import parse_search_query
+from sqlalchemy_utils.expressions import (
+    tsvector_match, tsvector_concat, to_tsquery
+)
+
+
 def user_able(user_key):
 	if user_key == app.config['API_KEY']:
 		return True
@@ -38,7 +44,7 @@ def json_recipe(recipe, admin=False):
 		ings = {}
 
 		ings['original'] = ing.original
-		ings['name'] = ing.name.name
+		ings['name'] = db.session.query(models.Ingredient_Name).filter(models.Ingredient_Name.id == ing.name).first().name
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		ings['modifiers'] = ing.modifiers
@@ -51,6 +57,33 @@ def json_recipe(recipe, admin=False):
 
 	return rv
 
+def get_unknown():
+	unknown = db.session.query(models.Ingredient_Name).filter(models.Ingredient_Name.name == 'unknown')
+
+	if unknown.count() < 1:
+		ingn = models.Ingredient_Name(name='unknown')
+		db.session.add(ingn)
+		db.session.commit()
+
+		return ingn.id
+	else:
+		return unknown.first().id
+
+def add_ingredient_name(name, unknown_id):
+	if len(name) < 1:
+		return unknown_id
+
+	name = name.lower()
+
+	ing = db.session.query(models.Ingredient_Name).filter(models.Ingredient_Name.name == name)
+
+	if ing.count() < 1:
+		new_ing = models.Ingredient_Name(name=name)
+		db.session.add(new_ing)
+		db.session.commit()
+		return new_ing.id
+	else:
+		return ing.first().id
 
 class IngredientAPI(Resource):
 	def __init__(self):
@@ -64,19 +97,23 @@ class IngredientAPI(Resource):
 
 		if user_able(args['key']):
 			t = None
-			for ing in args['with']:
-				q = db.session.query(models.Recipe).join(models.Ingredient).filter(models.Ingredient.name == ing)
 
-				if t is not None:
-					t = t.intersect(q)
-				else:
-					t = q
+			if args['with'] == None:
+				args['with'] = []
+
+			if args['without'] == None:
+				args['without'] = []
+
+			for ing in args['with']:
+				q = db.session.query(models.Recipe).join(models.Ingredient, models.Recipe.ingredients).join(models.Ingredient_Name).filter(models.Ingredient_Name.name == ing)
+				t = q
+				print('With: ' + str(q.count()))
 
 			for ing in args['without']:
-				q = db.session.query(models.Recipe).join(models.Ingredient).filter(models.Ingredient.name != ing)
-
-				if t is not None:
-					t = t.intersect(q)
+				q = db.session.query(models.Recipe).join(models.Ingredient, models.Recipe.ingredients).join(models.Ingredient_Name).filter(models.Ingredient_Name.name == ing)
+				print('Without: ' + str(q.count()))
+				if t != None:
+					t = t.except_(q)
 				else:
 					t = q
 
@@ -112,8 +149,24 @@ class RecipeTitleAPI(Resource):
 		args = self.reqparse.parse_args()
 
 		if user_able(args['key']):
-			recipes = models.Recipe.query.whoosh_search(args['name'], 10).all()
-			print(recipes)
+			combined_search_vector = tsvector_concat(
+				models.Recipe.search_vector,
+				models.Ingredient.search_vector
+			)
+
+			recipes = (
+				db.session.query(models.Recipe)
+				.join(models.Ingredient, models.Recipe.ingredients)
+				.filter(
+					tsvector_match(
+						combined_search_vector,
+						to_tsquery(
+							'simple',
+							parse_search_query(args['name'])
+						),
+					)
+				)
+			)
 
 			rv = []
 
@@ -143,6 +196,8 @@ class RecipeAddAPI(Resource):
 		if args['key'] != app.config['API_KEY']:
 			abort(403)
 
+		unknown_id = get_unknown()
+
 		recipe = models.Recipe(
 			name = args['name'],
 			description = args['description'],
@@ -170,18 +225,20 @@ class RecipeAddAPI(Resource):
 
 			ingredient = None
 			if len(ing) == 4:
+				n = add_ingredient_name(ing[3], unknown_id)
 				ingredient = models.Ingredient(
 					original = ing[0],
 					amount = ing[1],
 					unit = ing[2],
-					name = ing[3])
+					name = n)
 
 			if len(ing) == 5:
+				n =add_ingredient_name(ing[3], unknown_id)
 				ingredient = models.Ingredient(
 					original = ing[0],
 					amount = ing[1],
 					unit = ing[2],
-					name = ing[3],
+					name = n,
 					modifiers = ing[4])
 
 			db.session.add(ingredient)
@@ -227,8 +284,6 @@ class ReportError(Resource):
 		app.logger.error(body)
 
 		return "Bad Recipe Reported", 200
-
-
 
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
