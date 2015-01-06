@@ -54,6 +54,7 @@ def json_recipe(recipe, admin=False):
 		i.append(ings)
 
 	rv['ingredients'] = i
+	rv['key'] = app.config['API_KEY']
 
 	return rv
 
@@ -69,7 +70,7 @@ def get_unknown():
 	else:
 		return unknown.first().id
 
-def add_ingredient_name(name, unknown_id):
+def add_ingredient_name(name):
 	if len(name) < 1:
 		return unknown_id
 
@@ -84,6 +85,13 @@ def add_ingredient_name(name, unknown_id):
 		return new_ing.id
 	else:
 		return ing.first().id
+
+#Allows admin access. If the key does not match, will immediatly abort. Otherwise nothing happens and can continue as if
+#you have admin priv.
+def admin(key):
+	if key != app.config['API_KEY']:
+		abort(403)
+
 
 class IngredientAPI(Resource):
 	def __init__(self):
@@ -193,8 +201,7 @@ class RecipeAddAPI(Resource):
 	def post(self):
 		args = self.reqparse.parse_args()
 
-		if args['key'] != app.config['API_KEY']:
-			abort(403)
+		admin(args['key'])
 
 		unknown_id = get_unknown()
 
@@ -225,7 +232,7 @@ class RecipeAddAPI(Resource):
 
 			ingredient = None
 			if len(ing) == 4:
-				n = add_ingredient_name(ing[3], unknown_id)
+				n = add_ingredient_name(ing[3])
 				ingredient = models.Ingredient(
 					original = ing[0],
 					amount = ing[1],
@@ -233,7 +240,7 @@ class RecipeAddAPI(Resource):
 					name = n)
 
 			if len(ing) == 5:
-				n =add_ingredient_name(ing[3], unknown_id)
+				n =add_ingredient_name(ing[3])
 				ingredient = models.Ingredient(
 					original = ing[0],
 					amount = ing[1],
@@ -249,22 +256,22 @@ class RecipeAddAPI(Resource):
 
 class ResetFree(Resource):
 	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('key', type=str, required=True)
 
 	def get(self):
 		args = self.reqparse.parse_args()
 
-		if args['key'] == app.config['API_KEY']:
-			users = db.session.query(models.User)
+		admin(args['key'])
 
-			for user in users:
-				user.free_credits = 100
+		users = db.session.query(models.User)
 
-			db.session.commit()
+		for user in users:
+			user.free_credits = 100
 
-			return "Free Credits Reset", 201
-		else:
-			return 403
+		db.session.commit()
+
+		return "Free Credits Reset", 201
 
 
 class ReportError(Resource):
@@ -285,9 +292,41 @@ class ReportError(Resource):
 
 		return "Bad Recipe Reported", 200
 
+class AddIngredientToRecipe():
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('key', type=str, required=True)
+		self.reqparse.add_argument('name', type=str, required=True)
+		self.reqparse.add_argument('unit', type=str, required=True)
+		self.reqparse.add_argument('amount', type=int, required=True)
+		self.reqparse.add_argument('recipe_id', type=int, required=True)
+		self.reqparse.add_argument('modifiers', type=str)
+
+	def post(self):
+		args = self.reqparse.parse_args()
+
+		if args['key'] != app.config['API_KEY']:
+			abort(403)
+
+		name = add_ingredient_name(args['name'])
+		ingredient = models.Ingredient(
+			original = 'Added and Edited from original recipe.',
+			amount = args['amount'],
+			unit = args['unit'],
+			name = name)
+
+		recipe = db.session.query(models.Recipe).filter(models.Recipe.id == args['recipe_id']).first()
+		recipe.ingredients.append(ingredient)
+
+		db.session.commit()
+
+
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
 api.add_resource(IngredientAPI, '/api/v1/ingredients')
 api.add_resource(RecipeAddAPI, '/api/v1/add')
 api.add_resource(ResetFree, '/api/v1/reset')
 api.add_resource(ReportError, '/api/v1/report_error')
+
+#APIs for editing recipes.
+api.add_resource(AddIngredientToRecipe, '/api/v1/recipe_edit/add_ingredient')

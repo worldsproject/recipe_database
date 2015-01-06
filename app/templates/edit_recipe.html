@@ -27,6 +27,7 @@
 	<div class='col-md-6'>
 	<h3>Add Ingredient</h3>
 	<form action='/recipe_edit/add_ingredient' method="post">
+		<input type='hidden' name='key' value='{{ key }}'>
 		<strong>Name</strong><input type='text' name='name'><br>
 		<strong>Unit</strong><input type='text' name='unit'><br>
 		<strong>Amount</strong><input type='text' name='amount'><br>
