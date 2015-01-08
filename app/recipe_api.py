@@ -1,5 +1,5 @@
 from flask.ext.restful import Resource, reqparse
-from flask import jsonify, abort
+from flask import jsonify, abort, redirect
 from app import app, api, db, models
 from sqlalchemy import update
 
@@ -54,7 +54,9 @@ def json_recipe(recipe, admin=False):
 		i.append(ings)
 
 	rv['ingredients'] = i
-	rv['key'] = app.config['API_KEY']
+
+	if admin:
+		rv['key'] = app.config['API_KEY']
 
 	return rv
 
@@ -292,33 +294,81 @@ class ReportError(Resource):
 
 		return "Bad Recipe Reported", 200
 
-class AddIngredientToRecipe():
+class AddIngredientToRecipe(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('key', type=str, required=True)
 		self.reqparse.add_argument('name', type=str, required=True)
 		self.reqparse.add_argument('unit', type=str, required=True)
-		self.reqparse.add_argument('amount', type=int, required=True)
+		self.reqparse.add_argument('amount', type=float, required=True)
 		self.reqparse.add_argument('recipe_id', type=int, required=True)
 		self.reqparse.add_argument('modifiers', type=str)
 
 	def post(self):
 		args = self.reqparse.parse_args()
 
-		if args['key'] != app.config['API_KEY']:
-			abort(403)
+		admin(args['key'])
 
 		name = add_ingredient_name(args['name'])
 		ingredient = models.Ingredient(
 			original = 'Added and Edited from original recipe.',
 			amount = args['amount'],
 			unit = args['unit'],
-			name = name)
+			name = name,
+			modifiers = args['modifiers'])
 
 		recipe = db.session.query(models.Recipe).filter(models.Recipe.id == args['recipe_id']).first()
 		recipe.ingredients.append(ingredient)
 
 		db.session.commit()
+
+		return redirect('/recipe_edit/' + str(args['recipe_id']))
+
+class DeleteIngredientFromRecipe(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('key', type=str, required=True)
+		self.reqparse.add_argument('recipe_id', type=str, required=True)
+		self.reqparse.add_argument('ingredient_id', type=str, required=True)
+
+	def post(self):
+		args = self.reqparse.parse_args()
+
+		admin(args['key'])
+
+		recipe = db.session.query(models.Recipe).filter(models.Recipe.id == args['recipe_id']).first()
+		ingredient = db.session.query(models.Ingredient).filter(models.Ingredient.id == args['ingredient_id']).first()
+		recipe.ingredients.remove(ingredient)
+		db.session.commit()
+
+		return redirect('/recipe_edit/' + args['recipe_id'])
+
+class EditRecipe(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('name', type=str, required=True)
+		self.reqparse.add_argument('directions', type=str, required=True)
+		self.reqparse.add_argument('recipe_id', type=int, required=True)
+		self.reqparse.add_argument('key', type=str, required=True)
+		self.reqparse.add_argument('prep_time', type=str, required=True)
+		self.reqparse.add_argument('cook_time', type=str, required=True)
+		self.reqparse.add_argument('image_url', type=str, required=True)
+		self.reqparse.add_argument('origin', type=str, required=True)
+
+	def post(self):
+		args = self.reqparse.parse_args()
+
+		admin(args['key'])
+
+		recipe = db.session.query(models.Recipe).filter(models.Recipe.id==args['recipe_id']).first()
+		recipe.directions=args['directions']
+		recipe.prep_time=args['prep_time']
+		recipe.cook_time=args['cook_time']
+		recipe.image_url=args['image_url']
+		recipe.origin=args['origin']
+		db.session.commit()
+
+		return redirect('/recipe_edit/' + str(args['recipe_id']))
 
 
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
@@ -330,3 +380,5 @@ api.add_resource(ReportError, '/api/v1/report_error')
 
 #APIs for editing recipes.
 api.add_resource(AddIngredientToRecipe, '/api/v1/recipe_edit/add_ingredient')
+api.add_resource(DeleteIngredientFromRecipe, '/api/v1/recipe_edit/delete_ingredient')
+api.add_resource(EditRecipe, '/api/v1/recipe_edit/edit_recipe')

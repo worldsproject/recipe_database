@@ -2,38 +2,53 @@
 {% block body %}
 <div class ='row'>
 	<div class='col-md-6'>
-		<form action='/recipe_edit/edit' method="post">
-			<strong>ID</strong><input type='text' name='recipe_id' value={{ recipe.id }} readonly><br>
-			<strong>Name</strong><input type='text' name='recipe_name' value={{ recipe.name }}><br>
-			<strong>Directions</strong><textarea name='directions' rows='6' cols='50'>{{ recipe.directions }}</textarea><br>
-			<strong>Prep Time</strong><input type='text' name='prep_time' value={{ recipe.prep_time }}><br>
-			<strong>Cook Time</strong><input type='text' name='cook_time' value={{ recipe.cook_time }}><br>
-			<strong>Image URL</strong><input type='text' name='image' value={{ recipe.image }}><br>
-			<strong>Origin</strong><input type='text' name='credit' value={{ recipe.origin }}></br>
-
-			{% for ing in recipe.ingredients %}
-				<h3>Ingredient</h3>
-				<strong>Original</strong><textarea name='original'>{{ ing.original }}</textarea><br>
-				<strong>ID</strong><input type='text' name='id_{{ loop.index0 }}' value='{{ ing.id }}'><br>
-				<strong>Name</strong><input type='text' name='name_{{ loop.index0 }}' value='{{ ing.name }}'><br>
-				<strong>Unit</strong><input type='text' name='unit_{{ loop.index0 }}' value='{{ ing.unit }}'><br>
-				<strong>Amount</strong><input type='text' name='amount_{{ loop.index0 }}' value='{{ ing.amount }}'><br>
-				<strong>Modifiers</strong><input type='text' name='modifiers_{{ loop.index0 }}' value='{{ ing.modifiers }}'><br>
-			{% endfor %}
+		<h3>Add Ingredient</h3>
+		<form action='/api/v1/recipe_edit/add_ingredient' method="post">
+			<input type='hidden' name='recipe_id' value='{{ recipe.id }}'>
+			<input type='hidden' name='key' value='{{ recipe.key }}'>
+			<strong>Name</strong><input type='text' name='name'><br>
+			<strong>Unit</strong><input type='text' name='unit'><br>
+			<strong>Amount</strong><input type='text' name='amount'><br>
+			<strong>Modifiers</strong><input type="text" name="modifiers">
 			<button type='submit'>Submit</button>
 		</form>
 	</div>
-
 	<div class='col-md-6'>
-	<h3>Add Ingredient</h3>
-	<form action='/recipe_edit/add_ingredient' method="post">
-		<input type='hidden' name='key' value='{{ key }}'>
-		<strong>Name</strong><input type='text' name='name'><br>
-		<strong>Unit</strong><input type='text' name='unit'><br>
-		<strong>Amount</strong><input type='text' name='amount'><br>
-		<strong>Modifiers</strong><input type="text" name="modifiers">
-		<button type='submit'>Submit</button>
-	</form>
+		<form action='/api/v1/recipe_edit/edit_recipe' method="post">
+			<input type='hidden' name='key' value='{{ recipe.key }}'>
+			<input type='hidden' name='recipe_id' value={{ recipe.id }}>
+			<strong>Name</strong><input type='text' name='name' value={{ recipe.name }}><br>
+			<strong>Directions</strong><textarea name='directions' rows='6' cols='50'>{{ recipe.directions }}</textarea><br>
+			<strong>Prep Time</strong><input type='text' name='prep_time' value={{ recipe.prep_time }}><br>
+			<strong>Cook Time</strong><input type='text' name='cook_time' value={{ recipe.cook_time }}><br>
+			<strong>Image URL</strong><input type='text' name='image_url' value={{ recipe.image }}><br>
+			<strong>Origin</strong><input type='text' name='origin' value={{ recipe.origin }}></br>
+			<button type='submit'>Submit</button>
+		</form>
+	</div>
+</div>
+<div class='row'>
+	{% for ing in recipe.ingredients %}
+		<div class='col-md-3'>
+			<div class='well'>
+				<strong>Original: </strong>{{ ing.original }}<br>
+				<strong>ID: </strong>{{ ing.id }}<br>
+				<strong>Name: </strong>{{ ing.name }}<br>
+				<strong>Unit: </strong>{{ ing.unit }}<br>
+				<strong>Amount: </strong>{{ ing.amount }}<br>
+				<strong>Modifiers: </strong>{{ ing.modifiers }}<br>
+			</div>
+		</div>
+	{% endfor %}
+</div>
+<div class="row">
+	<div class='col-md-6'>
+		<form action='/api/v1/recipe_edit/delete_ingredient' method="post">
+			<input type='hidden' name='recipe_id' value='{{ recipe.id }}'>
+			<input type='hidden' name='key' value='{{ recipe.key }}'>
+			<input type='text' name='ingredient_id'>
+			<button type='submit'>Delete</button>
+		</form>
 	</div>
 </div>
 {% endblock body %}
