@@ -35,6 +35,7 @@ def user_reg(sender, user, **extra):
 	user.generate_key()
 
 @app.route('/recipe_edit/<int:recipe_id>')
+@admin_permission.require()
 def edit_recipe(recipe_id):
 	recipe = db.session.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
 	from app.recipe_api import json_recipe
