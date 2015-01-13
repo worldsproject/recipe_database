@@ -11,3 +11,4 @@ create_admin.py
 test.db
 tmp/
 run_all.sh
+add_all_wikia.py
