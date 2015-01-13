@@ -88,6 +88,10 @@ def add_ingredient_name(name):
 	else:
 		return ing.first().id
 
+#Gets the recipe by given id, I'm sick of typing it out.
+def get_recipe(recipe_id):
+	return db.session.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
+
 #Allows admin access. If the key does not match, will immediatly abort. Otherwise nothing happens and can continue as if
 #you have admin priv.
 def admin(key):
@@ -143,7 +147,7 @@ class RecipeAPI(Resource):
 	def get(self, id):
 		args = self.reqparse.parse_args()
 		if user_able(args['key']):
-			recipe = db.session.query(models.Recipe).filter(models.Recipe.id == id).first()
+			recipe = get_recipe(id)
 
 			return(json_recipe(recipe))
 		else:
@@ -317,7 +321,7 @@ class AddIngredientToRecipe(Resource):
 			name = name,
 			modifiers = args['modifiers'])
 
-		recipe = db.session.query(models.Recipe).filter(models.Recipe.id == args['recipe_id']).first()
+		recipe = get_recipe(args['recipe_id'])
 		recipe.ingredients.append(ingredient)
 
 		db.session.commit()
@@ -336,7 +340,7 @@ class DeleteIngredientFromRecipe(Resource):
 
 		admin(args['key'])
 
-		recipe = db.session.query(models.Recipe).filter(models.Recipe.id == args['recipe_id']).first()
+		recipe = get_recipe(args['recipe_id'])
 		ingredient = db.session.query(models.Ingredient).filter(models.Ingredient.id == args['ingredient_id']).first()
 		recipe.ingredients.remove(ingredient)
 		db.session.commit()
@@ -360,7 +364,7 @@ class EditRecipe(Resource):
 
 		admin(args['key'])
 
-		recipe = db.session.query(models.Recipe).filter(models.Recipe.id==args['recipe_id']).first()
+		recipe = get_recipe(args['recipe_id'])
 		recipe.directions=args['directions']
 		recipe.prep_time=args['prep_time']
 		recipe.cook_time=args['cook_time']
@@ -369,6 +373,23 @@ class EditRecipe(Resource):
 		db.session.commit()
 
 		return redirect('/recipe_edit/' + str(args['recipe_id']))
+
+class EditMealTime(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('key', type=str, required=True)
+		self.reqparse.add_argument('id', type=int, required=True)
+		self.reqparse.add_argument('meal', type=int, required=True)
+
+	def post(self):
+		args = self.reqparse.parse_args()
+
+		admin(args['key'])
+
+		recipe = get_recipe(args['id'])
+		recipe.meal = args['meal']
+
+		return 200
 
 
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
@@ -382,3 +403,4 @@ api.add_resource(ReportError, '/api/v1/report_error')
 api.add_resource(AddIngredientToRecipe, '/api/v1/recipe_edit/add_ingredient')
 api.add_resource(DeleteIngredientFromRecipe, '/api/v1/recipe_edit/delete_ingredient')
 api.add_resource(EditRecipe, '/api/v1/recipe_edit/edit_recipe')
+api.add_resource(EditMealTime, '/api/v1/recipe_edit/edit_meal_time')

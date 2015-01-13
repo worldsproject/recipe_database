@@ -20,6 +20,14 @@ ingredients = db.Table('ingredients',
     db.Column('ingredient', db.Integer, db.ForeignKey('ingredient.id'))
     )
 
+breakfast = 1
+lunch = 2
+dinner = 4
+snack = 8
+appitizer = 16
+dessert = 32
+drink = 64
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
