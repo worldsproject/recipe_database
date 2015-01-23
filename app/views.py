@@ -1,29 +1,32 @@
-from app import app, db, models, user_datastore, recipe_api, api
-from sqlalchemy import or_
+from app import app, db, models
 from flask import request, render_template, url_for, redirect, flash, abort
-
-import json
-import requests
 
 import stripe
 
-from flask.ext.security import user_registered, login_required, current_user, roles_required
+from flask.ext.security import user_registered, \
+                               login_required, \
+                               current_user, \
+                               roles_required
 
 @app.route('/')
 def index():
+	""" Simply renders the index page. """
 	return render_template('index.html')
 
 @app.route('/pricing')
 def pricing():
+	""" Simply renders the pricing page. """
 	return render_template('pricing.html')
 
 @app.route('/howto')
 def how_to_use():
+	""" Simply renders the how to use page. """
 	return render_template('howto.html')
 
 @app.route('/user')
 @login_required
-def user():
+def user_page():
+	""" User profile page. """
 	email = current_user.email
 	key = current_user.key
 	free = current_user.free_credits
@@ -32,18 +35,23 @@ def user():
 
 @user_registered.connect_via(app)
 def user_reg(sender, user, **extra):
+	""" Generates an API key for newly registered users. """
 	user.generate_key()
 
 @app.route('/recipe_edit/<int:recipe_id>')
 @roles_required('admin')
 def edit_recipe(recipe_id):
-	recipe = db.session.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
+	""" Page for editing recipe. """
+	recipe = db.session.query(models.Recipe) \
+	           .filter(models.Recipe.id == recipe_id).first()
 	from app.recipe_api import json_recipe
 
-	return render_template('edit_recipe.html', recipe=json_recipe(recipe, admin=True))
+	return render_template('edit_recipe.html', \
+		recipe=json_recipe(recipe, admin=True))
 
 @app.route('/credit', methods=['POST'])
 def credit():
+	""" POST access for adding purchased credits using stripe. """
 	stripe.api_key = app.config['TEST_PRIVATE_TOKEN']
 	token = request.form['stripeToken']
 	amount = request.form['price']
@@ -58,15 +66,15 @@ def credit():
 	else:
 		return abort(503)
 
-	customer = stripe.Customer.create(
-		email = email,
-		card = token)
+	customer = stripe.Customer.create( \
+		email=email, \
+		card=token)
 
-	charge = stripe.Charge.create(
-		customer = customer.id,
-		amount = amount,
-		currency = 'usd',
-		description = 'Buying ' + str(amount) + '0 API credits.')
+	stripe.Charge.create( \
+		customer=customer.id, \
+		amount=amount, \
+		currency='usd', \
+		description='Buying ' + str(amount) + '0 API credits.')
 
 	if current_user.credits is None:
 		current_user.credits = (amount*10)
