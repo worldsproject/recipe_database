@@ -1,17 +1,18 @@
 from app import db
 db.create_all()
 
-from app import models, user_datastore
+from app import user_datastore
 from config import ADMIN_PASSWORD
 
 try:
     user_datastore.create_role(name="admin", description="Site Administrators.")
-    user_datastore.create_user(email="tbutram@worldsproject.org", password=ADMIN_PASSWORD)
+    user_datastore.create_user(email="tbutram@worldsproject.org",
+                               password=ADMIN_PASSWORD)
 
     user_datastore.add_role_to_user("tbutram@worldsproject.org", "admin")
 
     db.session.commit()
-except:
+except Exception:
     pass
 
 # Import your application as:
@@ -24,7 +25,6 @@ from app import app
 import cherrypy
 
 if __name__ == '__main__':
-
     # Mount the application
     cherrypy.tree.graft(app, "/")
 

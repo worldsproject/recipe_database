@@ -1,7 +1,6 @@
 from flask.ext.restful import Resource, reqparse
-from flask import jsonify, abort, redirect
+from flask import abort, redirect
 from app import app, api, db, models
-from sqlalchemy import update
 
 from sqlalchemy_searchable import parse_search_query
 from sqlalchemy_utils.expressions import (
@@ -9,24 +8,34 @@ from sqlalchemy_utils.expressions import (
 )
 
 
+"""
+Checks if a given user (based on their api key) is able to use the API,
+(they have free or paid credits)
+If a key given is a master key (from the config) always returns true.
+"""
 def user_able(user_key):
 	if user_key == app.config['API_KEY']:
 		return True
 
-	user = db.session.query(models.User).filter(models.User.key == user_key).first()
+	user = db.session.query(models.User).filter(models.User.key == user_key)\
+	                                    .first()
 
 	if user.free_credits > 0:
-		user.free_credits = user.free_credits - 1;
+		user.free_credits = user.free_credits - 1
 		db.session.commit()
 		return True
 
 	if user.credits > 0:
-		user.credits = user.credits - 1;
+		user.credits = user.credits - 1
 		db.session.commit()
 		return True
 
 	return False
 
+"""
+Given a recipe id, turns it into a json string. If admin is true, 
+returns the ingredient id as well.
+"""
 def json_recipe(recipe, admin=False):
 	rv = {}
 
@@ -44,7 +53,9 @@ def json_recipe(recipe, admin=False):
 		ings = {}
 
 		ings['original'] = ing.original
-		ings['name'] = db.session.query(models.Ingredient_Name).filter(models.Ingredient_Name.id == ing.name).first().name
+		ings['name'] = db.session.query(models.Ingredient_Name) \
+		                 .filter(models.Ingredient_Name.id == ing.name) \
+		                 .first().name
 		ings['unit'] = ing.unit
 		ings['amount'] = ing.amount
 		ings['modifiers'] = ing.modifiers
@@ -74,7 +85,7 @@ def get_unknown():
 
 def add_ingredient_name(name):
 	if len(name) < 1:
-		return unknown_id
+		return get_unknown()
 
 	name = name.lower()
 
@@ -88,12 +99,16 @@ def add_ingredient_name(name):
 	else:
 		return ing.first().id
 
-#Gets the recipe by given id, I'm sick of typing it out.
+"""
+Gets the recipe by given id.
+"""
 def get_recipe(recipe_id):
 	return db.session.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
 
-#Allows admin access. If the key does not match, will immediatly abort. Otherwise nothing happens and can continue as if
-#you have admin priv.
+"""
+Allows admin access. If the key does not match, will immediatly abort.
+Otherwise nothing happens and can continue as if you have admin priv.
+"""
 def admin(key):
 	if key != app.config['API_KEY']:
 		abort(403)
