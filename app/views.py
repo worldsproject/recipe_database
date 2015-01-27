@@ -1,4 +1,5 @@
-from app import app, db, models
+from app import app, db, models, recipe_api
+
 from flask import request, render_template, url_for, redirect, flash, abort
 
 import stripe

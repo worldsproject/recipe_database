@@ -472,7 +472,7 @@ class EditMealTime(Resource):
 		return 200
 
 
-api.add_resource(RecipeAPI, '/api/v1/recipes/<int:id>')
+api.add_resource(RecipeAPI, '/api/v1/recipes/<int:recipe_id>')
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
 api.add_resource(IngredientAPI, '/api/v1/ingredients')
 api.add_resource(RecipeAddAPI, '/api/v1/add')
