@@ -438,6 +438,7 @@ class EditRecipe(Resource):
 		is_admin(args['key'])
 
 		recipe = get_recipe(args['recipe_id'])
+		recipe.name = args['name']
 		recipe.directions = args['directions']
 		recipe.prep_time = args['prep_time']
 		recipe.cook_time = args['cook_time']
@@ -471,6 +472,57 @@ class EditMealTime(Resource):
 
 		return 200
 
+def get_meal_page(time, page):
+	db.session.query(models.Recipe) \
+			.filter(models.Recipe.meal == time) \
+			.slice(page*10, page*10+10)
+
+class MealTimeAPI(Resource):
+	"""
+	This API allows getting recipes by their associated meal time.
+	The only permitted values for the meal keyword are:
+	morning, afternoon, side, dessert or drink. All other values will
+	result in returning a 404.
+
+	T
+	"""
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('key', type=str, required=True)
+		self.reqparse.add_argument('meal', type=str, required=True)
+		self.reqparse.add_argument('page', type=int)
+
+	def post(self):
+		""" POST access for searching by meal time. """
+		args = self.reqparse.parse_args()
+
+		meal = args['meal']
+
+		if args['page'] is None:
+			args['page'] = 0
+
+		if meal == 'morning':
+			recipes = get_meal_page(models.morning, args['page'])
+		elif meal == 'afternoon':
+			recipes = get_meal_page(models.afternoon, args['page'])
+		elif meal == 'side':
+			recipes = get_meal_page(models.side, args['page'])
+		elif meal == 'dessert':
+			recipes = get_meal_page(models.dessert, args['page'])
+		elif meal == 'drink':
+			recipes = get_meal_page(models.drink, args['page'])
+		else:
+			abort(404)
+
+		returned = []
+		for recipe in recipes
+			returned.append(json_recipe(recipe))
+
+		return returned
+
+
+
 
 api.add_resource(RecipeAPI, '/api/v1/recipes/<int:recipe_id>')
 api.add_resource(RecipeTitleAPI, '/api/v1/recipes/')
@@ -478,6 +530,8 @@ api.add_resource(IngredientAPI, '/api/v1/ingredients')
 api.add_resource(RecipeAddAPI, '/api/v1/add')
 api.add_resource(ResetFree, '/api/v1/reset')
 api.add_resource(ReportError, '/api/v1/report_error')
+api.add_resource(MealTimeAPI, '/api/v1/by_meal/')
+api.add_resource(IngredientListAPI, '/api/v1/ingredient/<string:name>')
 
 #APIs for editing recipes.
 api.add_resource(AddIngredientToRecipe, '/api/v1/recipe_edit/add_ingredient')
