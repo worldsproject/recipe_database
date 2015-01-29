@@ -516,10 +516,25 @@ class MealTimeAPI(Resource):
 			abort(404)
 
 		returned = []
-		for recipe in recipes
+		for recipe in recipes:
 			returned.append(json_recipe(recipe))
 
 		return returned
+
+class IngredientListAPI(Resource):
+	"""
+	Returns a list of 10 ingredients that match the given string.
+	"""
+
+	def get(self, name):
+		words = models.Ingredient_Name.name.ilike(name).limit(10)
+
+		ret = []
+
+		for word in words:
+			ret.append(word)
+
+		return ret
 
 
 
