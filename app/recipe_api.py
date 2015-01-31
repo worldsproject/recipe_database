@@ -469,13 +469,14 @@ class EditMealTime(Resource):
 
 		recipe = get_recipe(args['id'])
 		recipe.meal = args['meal']
+		db.session.commit()
 
 		return 200
 
 def get_meal_page(time, page):
-	db.session.query(models.Recipe) \
+	return db.session.query(models.Recipe) \
 			.filter(models.Recipe.meal == time) \
-			.slice(page*10, page*10+10)
+			.slice(page*10,page*10+10)
 
 class MealTimeAPI(Resource):
 	"""
@@ -527,12 +528,12 @@ class IngredientListAPI(Resource):
 	"""
 
 	def get(self, name):
-		words = models.Ingredient_Name.name.ilike(name).limit(10)
+		words = db.session.query(models.Ingredient_Name).filter(models.Ingredient_Name.name.like('%' + name + '%')).limit(10)
 
 		ret = []
 
 		for word in words:
-			ret.append(word)
+			ret.append(word.name)
 
 		return ret
 
