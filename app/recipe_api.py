@@ -6,6 +6,7 @@ from sqlalchemy_searchable import parse_search_query
 from sqlalchemy_utils.expressions import (
     tsvector_match, tsvector_concat, to_tsquery
 )
+from sqlalchemy.sql.expression import func
 
 
 def user_able(user_key):
@@ -473,10 +474,11 @@ class EditMealTime(Resource):
 
 		return 200
 
-def get_meal_page(time, page):
+def get_meal_page(time, number):
 	return db.session.query(models.Recipe) \
 			.filter(models.Recipe.meal == time) \
-			.slice(page*10,page*10+10)
+            .order_by(func.random()) \
+            .limit(number)
 
 class MealTimeAPI(Resource):
 	"""
@@ -485,14 +487,14 @@ class MealTimeAPI(Resource):
 	morning, afternoon, side, dessert or drink. All other values will
 	result in returning a 404.
 
-	T
+    By default will only return one recipe.
 	"""
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('key', type=str, required=True)
 		self.reqparse.add_argument('meal', type=str, required=True)
-		self.reqparse.add_argument('page', type=int)
+        self.reqparse.add_argument('number', type=int, default=1)
 
 	def post(self):
 		""" POST access for searching by meal time. """
@@ -500,19 +502,16 @@ class MealTimeAPI(Resource):
 
 		meal = args['meal']
 
-		if args['page'] is None:
-			args['page'] = 0
-
 		if meal == 'morning':
-			recipes = get_meal_page(models.morning, args['page'])
+			recipes = get_meal_page(models.morning, args['number'])
 		elif meal == 'afternoon':
-			recipes = get_meal_page(models.afternoon, args['page'])
+			recipes = get_meal_page(models.afternoon, args['number'])
 		elif meal == 'side':
-			recipes = get_meal_page(models.side, args['page'])
+			recipes = get_meal_page(models.side, args['number'])
 		elif meal == 'dessert':
-			recipes = get_meal_page(models.dessert, args['page'])
+			recipes = get_meal_page(models.dessert, args['number'])
 		elif meal == 'drink':
-			recipes = get_meal_page(models.drink, args['page'])
+			recipes = get_meal_page(models.drink, args['number'])
 		else:
 			abort(404)
 
