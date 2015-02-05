@@ -84,4 +84,4 @@ def credit():
 	db.session.commit()
 
 	flash(str(amount) + " credits have been added.")
-	return redirect(url_for('user'))
+	return redirect(url_for('user_page'))
