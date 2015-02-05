@@ -11,6 +11,7 @@ There are 3 different types of requests you can make to get recipes back.
 <p>Any other recipe result also returns a recipe id, which can be used here to retrieve an individual recipe.</p>
 
 <h4>Full text search</h4>
+Searches in the recipe title and directions for the given text.
 
 <code>
 	https://db.yourdaily.menu/api/v1/recipes
@@ -23,6 +24,8 @@ There are 3 different types of requests you can make to get recipes back.
 </code>
 
 <h4> Search by ingredient </h4>
+Searches the database by ingredient. You are able to include both ingredients that
+are required and recipes that are required to <strong>not</strong> be there.
 
 <code>
 	https://db.yourdaily.menu/api/v1/ingredients
@@ -45,8 +48,39 @@ with:garlic<br>
 without:tomato<br>
 </code>
 
+<h4>Searching by meal time</h4>
+Returns recipes that are typically eaten during a specific meal-time. This list
+is subjective to both human and machine biases. Meal time options are:
+<ul>
+	<li>Morning</li>
+	<li>Afternoon</li>
+	<li>Appitizers/Sizes</li>
+	<li>Drinks</li>
+	<li>Desserts</li>
+</ul>
+
+<code>
+	https://db.yourdaily.menu/api/v1/by_meal<br>
+	POST Data<br>
+	key:yourkey<br>
+	meal:[morning|afternoon|drink|dessert|side]<br>
+	number:number of recipes to be returned<br>
+
+<h4>Searching ingredients</h4>
+Searches actual ingredient names. Useful for building dropdowns that only contain
+ingredients within the database. Ingredient data returned does not have any ties
+to the recipes that they are a part of, and only returns matching ingredient names.
+This does not consume API credits, free or paid.
+
+<code>
+	https://db.yourdaily.menu/api/v1/ingredient/[ingredient_name]
+</code>
+
+
 <h4>Reporting a bad recipe</h4>
-<p>If you find some bad recipe data, either badly formatted ingredients, broken directions or anything else, please send the recipe ID so that it can be fixed.</p>
+<p>If you find some bad recipe data, either badly formatted ingredients,
+	broken directions or anything else, please send the recipe ID so that it can be fixed.
+	This does not consume API credits free or paid.</p>
 
 <code>
 	https://db.yourdaily.menu/api/v1/report_error

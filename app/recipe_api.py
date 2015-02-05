@@ -500,7 +500,7 @@ class MealTimeAPI(Resource):
         """ POST access for searching by meal time. """
         args = self.reqparse.parse_args()
 
-        meal = args['meal']
+        meal = args['meal'].lower()
 
         if meal == 'morning':
             recipes = get_meal_page(models.morning, args['number'])
