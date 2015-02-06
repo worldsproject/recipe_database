@@ -536,6 +536,25 @@ class IngredientListAPI(Resource):
 
         return ret
 
+class IngredientSearchAPI(Resource):
+    """
+    Returns a list of 10 ingredients. The POST version of IngredientListAPI
+    """
+    def __init__():
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('name', type=str, required=True)
+
+    def post(self):
+        name = self.reqparse.parse_args()['name']
+
+        words = db.session.query(models.Ingredient_Name).filter(models.Ingredient_Name.name.like('%' + name + '%')).limit(10)
+
+        ret = []
+
+        for word in words:
+            ret.append(word.name)
+
+        return ret
 
 
 
@@ -545,6 +564,7 @@ api.add_resource(IngredientAPI, '/api/v1/ingredients')
 api.add_resource(ReportError, '/api/v1/report_error')
 api.add_resource(MealTimeAPI, '/api/v1/by_meal/')
 api.add_resource(IngredientListAPI, '/api/v1/ingredient/<string:name>')
+api.add_resource(IngredientSearchAPI, '/api/v1/ingredient_search')
 
 #APIs for editing recipes.
 
